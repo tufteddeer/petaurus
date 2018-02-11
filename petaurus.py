@@ -30,7 +30,13 @@ def main():
     for book in audiobooksToRead:
         for i in range(1, int(book["TOTAL_CDS"])+1):
             book["CD"] = prefixNumber(i)
-            input("Insert disc " + str(i) + " from " + book["ALBUM"] + " and press enter.")
+            exc = -1
+            while exc != 0:
+                input("Insert disc " + str(i) + " from " + book["ALBUM"] + " and press enter.")
+                exc = os.system("cdparanoia -Qq")
+                if exc != 0:
+                    print("Unable to read disc. (If your CD-Drive makes noise, wait a few seconds and try again)")
+            
             ripDisc(book)
             if ejectDisc:
                     os.system("eject")
