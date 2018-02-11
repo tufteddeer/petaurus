@@ -5,7 +5,6 @@ import time
 import yaml
 
 tmpDir = ".cdrip"
-keepWAV = True
 targetDirTemplate = "Audiobooks/$SERIES/$ALBUM/CD $CD"
 fileNameTemplate = "$ALBUM $CD-$TRACKNUMBER.ogg"
 
@@ -13,7 +12,7 @@ def main():
     checkTool("cdparanoia")
     checkTool("opusenc")
     ejectDisc = checkTool("eject", True)
-    print(ejectDisc)
+    
     audiobooksToRead = []
     #if a metadata file is specified via arg[1], read it. if not, use interactive mode.
     if len(sys.argv) > 1:
@@ -46,7 +45,7 @@ def ripDisc(meta):
         cleanupAndExit(1)
 
     #run cdparanoia to produce .wav files
-    exc = os.system("cd " + tmpDir + " && cdparanoia -B -- \"-1\"")
+    exc = os.system("cd " + tmpDir + " && cdparanoia -B")
     if exc != 0:
         print("Failed to read disc.")
         cleanupAndExit(1)
@@ -59,8 +58,6 @@ def ripDisc(meta):
             meta["TITLE"] = meta["ALBUM"]+" "+str(meta["CD"])+"-"+str(meta["TRACKNUMBER"])
     
             wavToOpus(filename, meta)
-            if not keepWAV:
-                os.remove(filename)
         else:
             continue
 
