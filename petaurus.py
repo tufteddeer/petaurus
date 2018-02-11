@@ -29,7 +29,7 @@ def main():
 
     for book in audiobooksToRead:
         for i in range(1, int(book["TOTAL_CDS"])+1):
-            book["CD"] = i
+            book["CD"] = prefixNumber(i)
             input("Insert disc " + str(i) + " from " + book["ALBUM"] + " and press enter.")
             ripDisc(book)
             if ejectDisc:
@@ -54,7 +54,7 @@ def ripDisc(meta):
     for filename in os.listdir(tmpDir):
         if filename.endswith(".cdda.wav"):
             #modify track specific metadata
-            meta["TRACKNUMBER"] = str(counter)
+            meta["TRACKNUMBER"] = prefixNumber(counter)
             meta["TITLE"] = meta["ALBUM"]+" "+str(meta["CD"])+"-"+str(meta["TRACKNUMBER"])
     
             wavToOpus(filename, meta)
@@ -91,7 +91,7 @@ def buildCommentArgs(meta):
     return comments
 
 def fillTemplate(template, meta):
-    for key, value in meta.items():
+    for key, value in meta.items(): 
         template = template.replace("$" + key, str(value))
     return template
 
@@ -150,6 +150,12 @@ def readMetaFile(filename):
                 meta[attr] = dataMap[book][attr]
             books.append(meta)
     return books
+
+def prefixNumber(number):
+    if number < 10:
+        return "0" + str(number)
+    else:
+        return str(number)
 
 if __name__ == "__main__":
     main()
