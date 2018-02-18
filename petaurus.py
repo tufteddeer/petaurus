@@ -6,8 +6,8 @@ import yaml
 import argparse
 
 tmpDir = ".cdrip"
-targetDirTemplate = "Audiobooks/$SERIES/$ALBUM/CD $CD"
-fileNameTemplate = "$ALBUM $CD-$TRACKNUMBER.ogg"
+targetDirTemplate = "Audiobooks/$SERIES/$ALBUM/CD $DISCNUMBER"
+fileNameTemplate = "$ALBUM $DISCNUMBER-$TRACKNUMBER.ogg"
 
 def main():
 
@@ -31,7 +31,7 @@ def main():
 
     for book in audiobooksToRead:
         for i in range(1, int(book["TOTAL_CDS"])+1):
-            book["CD"] = prefixNumber(i)
+            book["DISCNUMBER"] = prefixNumber(i)
             exc = -1
             while exc != 0:
                 input("Insert disc " + str(i) + " from " + book["ALBUM"] + " and press enter.")
@@ -64,7 +64,7 @@ def ripDisc(meta):
         cleanupAndExit(1)
 
     #run cdparanoia to produce .wav files
-    exc = os.system("cd " + tmpDir + " && cdparanoia -B")
+    exc = os.system("cd " + tmpDir + " && cdparanoia -B -- \"-1\"")
     if exc != 0:
         print("Failed to read disc.")
         cleanupAndExit(1)
@@ -74,7 +74,7 @@ def ripDisc(meta):
         if filename.endswith(".cdda.wav"):
             #modify track specific metadata
             meta["TRACKNUMBER"] = prefixNumber(counter)
-            meta["TITLE"] = meta["ALBUM"]+" "+str(meta["CD"])+"-"+str(meta["TRACKNUMBER"])
+            meta["TITLE"] = meta["ALBUM"]+" "+str(meta["DISCNUMBER"])+"-"+str(meta["TRACKNUMBER"])
     
             wavToOpus(filename, meta)
         else:
@@ -145,7 +145,7 @@ def readAlbumMeta():
     
     meta["TITLE"] = "",
     meta["TRACKNUMBER"] = "",
-    meta["CD"] = "1"
+    meta["DISCNUMBER"] = "1"
     return meta
 
 def readMetaFile(filename):
@@ -162,7 +162,7 @@ def readMetaFile(filename):
             meta["TOTAL_CDS"] = "1"
             meta["TITLE"] = "",
             meta["TRACKNUMBER"] = "",
-            meta["CD"] = "1"
+            meta["DISCNUMBER"] = "1"
             meta["ALBUM"] = book
             #overwrite defaults with custom values
             for attr in dataMap[book]:
