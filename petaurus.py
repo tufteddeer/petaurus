@@ -3,29 +3,31 @@ import sys
 import shutil
 import time
 import yaml
+import argparse
 
 tmpDir = ".cdrip"
 targetDirTemplate = "Audiobooks/$SERIES/$ALBUM/CD $CD"
 fileNameTemplate = "$ALBUM $CD-$TRACKNUMBER.ogg"
 
 def main():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--interactive", help="Interactive mode (default if no bookfile is provided)", action="store_true")
+    parser.add_argument("bookfile", nargs='?', help="yaml-File containing audiobook metadata.")
+    args = parser.parse_args()
+
     checkTool("cdparanoia")
     checkTool("opusenc")
     ejectDisc = checkTool("eject", True)
     
-    audiobooksToRead = []
-    #if a metadata file is specified via arg[1], read it. if not, use interactive mode.
-    if len(sys.argv) > 1:
-        if os.path.exists(sys.argv[1]):
-            audiobooksToRead = readMetaFile(sys.argv[1])
+    if args.bookfile:
+        if os.path.exists(args.bookfile):
+            audiobooksToRead = readMetaFile(args.bookfile)
         else:
-            print(sys.argv[1] + " does not exist.")
+            print("File " + args.bookfile + " does not exist.")
+            return
     else:
-        readAnother = True
-        while readAnother:
-            meta = readAlbumMeta()
-            audiobooksToRead.append(meta)
-            readAnother = read("Add another Album", "y/N") == "y"
+        audiobooksToRead = interactiveInput()
 
     for book in audiobooksToRead:
         for i in range(1, int(book["TOTAL_CDS"])+1):
@@ -40,6 +42,17 @@ def main():
             ripDisc(book)
             if ejectDisc:
                     os.system("eject")
+
+def interactiveInput():
+    print("Entering interactive mode")
+    
+    books = []
+    readAnother = True
+    while readAnother:
+        meta = readAlbumMeta()
+        books.append(meta)
+        readAnother = read("Add another Album", "y/N") == "y"
+    return books
 
 def ripDisc(meta):
     global tmpDir
