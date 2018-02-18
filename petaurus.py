@@ -64,7 +64,7 @@ def ripDisc(meta):
         cleanupAndExit(1)
 
     #run cdparanoia to produce .wav files
-    exc = os.system("cd " + tmpDir + " && cdparanoia -B -- \"-1\"")
+    exc = os.system("cd " + tmpDir + " && cdparanoia -B")
     if exc != 0:
         print("Failed to read disc.")
         cleanupAndExit(1)
